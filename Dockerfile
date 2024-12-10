@@ -15,6 +15,11 @@ ENV \
     # device configuration dir
     DEVICE_CONFIGS_DIR=/home/device-config
 
+# copy default configuration into container
+COPY default.env init.sh /etc/profile.d/
+# copy script and config vars
+COPY lineageos /bin
+
 # install packages
 RUN set -ex ;\
     apt-get update && apt-get install -y --no-install-recommends \
@@ -76,7 +81,8 @@ RUN set -ex ;\
           fakeroot \
           sudo \
           ;\
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* ;\
+    chmod a+x /usr/bin/lineageos
 
 # run config in a seperate layer so we cache it
 RUN set -ex ;\
@@ -98,10 +104,6 @@ RUN set -ex ;\
     # source init when any bash is called (which includes the lineageos script)
     echo "source /etc/profile.d/init.sh" >> /etc/bash.bashrc
 
-# copy default configuration into container
-COPY default.env init.sh /etc/profile.d/
-# copy script and config vars
-COPY lineageos /bin
 # copy dir with several PRed device configurations
 COPY device-config $DEVICE_CONFIGS_DIR
 
